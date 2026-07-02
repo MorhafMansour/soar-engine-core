@@ -1,0 +1,222 @@
+<group name="local,malware,">
+
+  <rule id="100200" level="13">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.parentImage" type="pcre2">(?i)(winword|excel|outlook|powerpnt|msaccess)\.exe</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)(cmd|powershell|wscript|mshta|cscript|rundll32|regsvr32)\.exe</field>
+    <description>Macro dropper: Office process spawned script interpreter</description>
+    <mitre><id>T1566.001</id></mitre>
+    <group>malware,sysmon,process_creation</group>
+  </rule>
+
+  <rule id="100201" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(powershell|pwsh)\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(-enc\s|-EncodedCommand\s|FromBase64String)</field>
+    <description>Encoded/obfuscated PowerShell command executed</description>
+    <mitre><id>T1059.001</id></mitre>
+    <group>malware,powershell,sysmon</group>
+  </rule>
+
+  <rule id="100202" level="13">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(powershell|pwsh)\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(IEX|Invoke-Expression|DownloadString|DownloadFile|WebClient|Invoke-WebRequest)</field>
+    <description>PowerShell download cradle detected</description>
+    <mitre><id>T1059.001</id></mitre>
+    <group>malware,powershell,sysmon</group>
+  </rule>
+
+  <rule id="100203" level="14">
+    <if_sid>61610</if_sid>
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)lsass\.exe</field>
+    <description>LSASS memory access — credential theft attempt</description>
+    <mitre><id>T1003.001</id></mitre>
+    <group>malware,sysmon,credential_theft</group>
+  </rule>
+
+  <rule id="100204" level="13">
+    <if_sid>61608</if_sid>
+    <description>CreateRemoteThread detected — process injection attempt</description>
+    <mitre><id>T1055</id></mitre>
+    <group>malware,dll_injection,sysmon</group>
+  </rule>
+
+  <rule id="100205" level="11">
+    <if_sid>61614</if_sid>
+    <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\CurrentVersion\\Run\\|\\CurrentVersion\\RunOnce\\)</field>
+    <description>Registry Run key modified — persistence mechanism detected</description>
+    <mitre><id>T1547.001</id></mitre>
+    <group>malware,registry_event,persistence</group>
+  </rule>
+
+  <rule id="100206" level="12">
+    <if_sid>61614</if_sid>
+    <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\System\\CurrentControlSet\\Services\\)</field>
+    <field name="win.eventdata.details" type="pcre2">(?i)(\.exe|\.dll|\.bat|\.ps1)</field>
+    <description>New service registered via registry — possible malware persistence</description>
+    <mitre><id>T1543.003</id></mitre>
+    <group>malware,registry_event,persistence</group>
+  </rule>
+
+  <rule id="100207" level="12">
+    <if_sid>61620,61621</if_sid>
+    <field name="win.eventdata.consumer" type="pcre2">(?i)(powershell|cmd|wscript|mshta|cscript|rundll32|\.exe|\.bat|\.ps1|\.vbs)</field>
+    <description>WMI event subscription with suspicious consumer</description>
+    <mitre><id>T1546.003</id></mitre>
+    <group>malware,wmi_activity,persistence</group>
+  </rule>
+
+  <rule id="100208" level="10">
+    <if_sid>550,554</if_sid>
+    <field name="syscheck.path" type="pcre2">(?i)(\\Temp\\|\\AppData\\Roaming\\|\\AppData\\Local\\Temp\\|\\ProgramData\\).*\.(exe|dll|bat|ps1|vbs|js)$</field>
+    <description>New executable or script written to suspicious path</description>
+    <mitre><id>T1204.002</id></mitre>
+    <group>malware,syscheck,file_integrity,syscheck_entry_added</group>
+  </rule>
+
+  <rule id="100209" level="11">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(\\Temp\\|\\AppData\\|\\ProgramData\\).*\.exe</field>
+    <field name="win.eventdata.originalFileName" type="pcre2">(?i)(powershell|cmd|mshta|wscript|cscript|rundll32|regsvr32)\.exe</field>
+    <description>System binary renamed and executed from suspicious path</description>
+    <mitre><id>T1036.003</id></mitre>
+    <group>malware,sysmon,process_creation</group>
+  </rule>
+
+  <rule id="100210" level="15">
+    <if_sid>550,554</if_sid>
+    <field name="syscheck.path" type="pcre2">(?i)\.(locked|encrypted|enc|crypt|ransom|wnry|wncry|zepto|locky|cerber)$</field>
+    <description>Ransomware — encrypted file extension detected</description>
+    <mitre><id>T1486</id></mitre>
+    <group>malware,ransomware,syscheck</group>
+  </rule>
+
+  <rule id="100211" level="15">
+    <if_sid>550,554</if_sid>
+    <field name="syscheck.path" type="pcre2">(?i)(README|DECRYPT|HOW_TO_RECOVER|RECOVER_FILES|YOUR_FILES|HELP_DECRYPT).*\.(txt|html|hta)$</field>
+    <description>Ransomware note file created</description>
+    <mitre><id>T1486</id></mitre>
+    <group>malware,ransomware,syscheck</group>
+  </rule>
+
+  <rule id="100212" level="10">
+    <if_sid>61612</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(powershell|pwsh|cmd|wscript|mshta|rundll32)\.exe</field>
+    <field name="win.eventdata.destinationPort" type="pcre2">^(?!(80|443|53|8080|8443|22|25|587|993|995|3389)$)\d{1,5}$</field>
+    <field name="win.eventdata.destinationIsIpv6" type="pcre2">(?i)false</field>
+    <description>Interpreter process making outbound connection on non-standard port</description>
+    <mitre><id>T1071.001</id></mitre>
+    <group>malware,sysmon,network_connection</group>
+  </rule>
+
+  <rule id="100213" level="11">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)schtasks\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(/create|/sc|/tr)</field>
+    <description>Scheduled task created via schtasks.exe</description>
+    <mitre><id>T1053.005</id></mitre>
+    <group>malware,sysmon,persistence</group>
+  </rule>
+
+  <rule id="100214" level="10">
+    <if_sid>61607</if_sid>
+    <field name="win.eventdata.signed" type="pcre2">(?i)false</field>
+    <field name="win.eventdata.imageLoaded" type="pcre2">(?i)(\\Temp\\|\\AppData\\|\\ProgramData\\)</field>
+    <description>Unsigned DLL loaded from suspicious path</description>
+    <mitre><id>T1574.001</id></mitre>
+    <group>malware,dll_injection,sysmon</group>
+  </rule>
+
+  <rule id="100215" level="13">
+    <if_sid>61625</if_sid>
+    <description>Process image tampering detected</description>
+    <mitre><id>T1055.012</id></mitre>
+    <group>malware,sysmon,process_injection</group>
+  </rule>
+
+  <rule id="100216" level="15">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin.*delete|wmic.*shadowcopy.*delete|bcdedit.*recoveryenabled.*no|wbadmin.*delete)</field>
+    <description>Shadow copy deletion detected — ransomware anti-forensics</description>
+    <mitre><id>T1490</id></mitre>
+    <group>malware,ransomware,sysmon</group>
+  </rule>
+
+  <rule id="100217" level="14">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(mimikatz|procdump.*lsass|sekurlsa|lsadump|wce\.exe|fgdump|pwdump|gsecdump)</field>
+    <description>Credential dumping tool executed</description>
+    <mitre><id>T1003</id></mitre>
+    <group>malware,sysmon,credential_theft</group>
+  </rule>
+
+  <rule id="100218" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(psexec|paexec|wmiexec|smbexec|crackmapexec)\.exe</field>
+    <description>Lateral movement tool detected</description>
+    <mitre><id>T1021.002</id></mitre>
+    <group>malware,sysmon,lateral_movement</group>
+  </rule>
+
+  <rule id="100219" level="15" frequency="2" timeframe="120">
+    <if_matched_sid>100201</if_matched_sid>
+    <same_field>agent.name</same_field>
+    <description>CORRELATED: Encoded PowerShell repeated on same host</description>
+    <mitre><id>T1566.001</id></mitre>
+    <group>malware,correlation,critical</group>
+  </rule>
+
+  <rule id="100220" level="15" frequency="2" timeframe="300">
+    <if_matched_sid>100210</if_matched_sid>
+    <same_field>agent.name</same_field>
+    <description>CORRELATED: Multiple encrypted files — active ransomware</description>
+    <mitre><id>T1486</id></mitre>
+    <group>malware,ransomware,correlation,critical</group>
+  </rule>
+
+  <rule id="100221" level="13">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)certutil\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(-decode|-urlcache|-ping|http|ftp)</field>
+    <description>certutil used as downloader or decoder</description>
+    <mitre><id>T1105</id></mitre>
+    <group>malware,sysmon,process_creation</group>
+  </rule>
+
+  <rule id="100222" level="8">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(\\net\.exe|\\net1\.exe)$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(user|localgroup|group|accounts|view|use|session|share)</field>
+    <description>net.exe used for reconnaissance</description>
+    <mitre><id>T1087.001</id></mitre>
+    <group>malware,sysmon,process_creation</group>
+  </rule>
+
+  <rule id="100223" level="11">
+    <if_sid>550,554</if_sid>
+    <field name="syscheck.path" type="pcre2">(?i)(\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\).*\.(exe|bat|ps1|vbs|lnk|js)$</field>
+    <description>File written to Startup folder — persistence detected</description>
+    <mitre><id>T1547.001</id></mitre>
+    <group>malware,syscheck,persistence,file_integrity</group>
+  </rule>
+
+  <rule id="100224" level="10">
+    <if_sid>61622</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(powershell|pwsh|cmd|wscript|mshta|rundll32)\.exe</field>
+    <field name="win.eventdata.queryName" type="pcre2">(?i)([a-z0-9]{20,}\.|\.onion$|\.bit$)</field>
+    <description>Suspicious DNS query from interpreter process</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>malware,sysmon,network_connection</group>
+  </rule>
+
+  <rule id="100225" level="8">
+    <if_sid>61612</if_sid>
+    <field name="win.eventdata.image" type="pcre2">(?i)(powershell|pwsh)\.exe</field>
+    <field name="win.eventdata.initiated" type="pcre2">(?i)true</field>
+    <description>PowerShell initiated outbound network connection</description>
+    <mitre><id>T1071.001</id></mitre>
+    <group>malware,sysmon,network_connection</group>
+  </rule>
+
+</group>
