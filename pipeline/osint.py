@@ -3,7 +3,7 @@
 import requests
 import logging
 
-VT_API_KEY = "87cbfe015ebf15dece0cf5ac9361ed034538595641bed0c4f414f846979a77f7"
+VT_API_KEY = "Api-key"
 MALWAREBAZAAR_URL = "https://mb-api.abuse.ch/api/v1/"
 
 SYSTEM_BINARY_HASHES = [
