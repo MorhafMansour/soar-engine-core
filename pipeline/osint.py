@@ -32,7 +32,7 @@ def run_osint_enrichment(alert: dict) -> dict:
     confidence_boost = 0
     enriched_family = alert.get("malware_family")
 
-    if VT_API_KEY and VT_API_KEY != "87cbfe015ebf15dece0cf5ac9361ed034538595641bed0c4f414f846979a77f7":
+    if VT_API_KEY and VT_API_KEY != "########################################":
         try:
             vt_url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
             headers = {"x-apikey": VT_API_KEY}
