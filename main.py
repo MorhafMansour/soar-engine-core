@@ -7,8 +7,8 @@ from pipeline.normalizer import normalize_alert, should_forward
 from pipeline.osint import run_osint_enrichment
 from pipeline.database import init_db_architecture, is_duplicate_alert, process_host_activity_window
 
-TELEGRAM_BOT_TOKEN = "8697887432:AAFYwGl8GmBrnw_dsr4xd4F2pc7zyKtzse8"
-TELEGRAM_CHAT_ID = "5784028681"
+TELEGRAM_BOT_TOKEN = "#############################"
+TELEGRAM_CHAT_ID = "#############"
 AI_API_URL = "https://api.openai.com/v1/chat/completions"
 AI_API_KEY = "YOUR_AI_API_KEY"
 
